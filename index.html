@@ -423,9 +423,20 @@
       const reviews = (g.positive || 0) + (g.negative || 0);
       const owners  = parseInt((g.owners || "0").split(" ")[0].replace(/,/g, "")) || 0;
 
-      const priceOk  = price <= priceMax;
-      const hidden   = owners < 500000 && reviews < 5000 && reviews > 20;
-      return priceOk && hidden;
+      const priceOk = price <= priceMax;
+      const hidden  = owners < 500000 && reviews < 5000 && reviews > 20;
+
+      const mode = state.answers.mode;
+      const tags = g.tags || {};
+      const hasTags = Object.keys(tags).length > 0;
+
+      const modeOk = mode === "any" || !hasTags
+        ? true
+        : mode === "coop"
+          ? !!(tags["Co-op"] || tags["Multiplayer"] || tags["Online Co-Op"] || tags["Local Co-Op"])
+          : !!(tags["Singleplayer"] || tags["Single-player"]);
+
+      return priceOk && hidden && modeOk;
     });
 
     // Перемешиваем и берём 9
