@@ -19,7 +19,7 @@
 
 ## Запуск
 
-Перейди по ссылке: [HiddenSteam]([https://example.com](https://courageous-pie-023f20.netlify.app/))
+Перейди по ссылке: [HiddenSteam](https://courageous-pie-023f20.netlify.app/)
 
 ## Запуск локально
 
