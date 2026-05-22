@@ -414,7 +414,7 @@
   // ============================================================
   async function fetchGames(genre, priceMax, mode) {
     // Запрос к нашему прокси-серверу
-    const res = await fetch(`http://localhost:3000/api/games?tag=${encodeURIComponent(genre)}`);
+    const res = await fetch(`https://hiddensteam-production.up.railway.app`);
     if (!res.ok) throw new Error("Ошибка сервера");
     const data = await res.json();
 
