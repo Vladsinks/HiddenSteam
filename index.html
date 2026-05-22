@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HiddenSteam 🕹️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #04080f;
+      --surface: #0d1b2a;
+      --border: #1a2f45;
+      --accent: #00e5ff;
+      --accent2: #39ff14;
+      --text: #dce8f0;
+      --muted: #4a6a80;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Фоновая сетка */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Голубое свечение сверху */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(0,229,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== ШАПКА ===== */
+    header {
+      text-align: center;
+      padding: 56px 24px 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .logo-icon { font-size: 44px; }
+
+    .logo-text {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== MAIN ===== */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 24px 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== КВИЗ ===== */
+    .quiz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 52px;
+      max-width: 540px;
+      margin: 0 auto;
+      box-shadow: 0 0 60px rgba(0,229,255,0.05);
+    }
+
+    .progress {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+
+    .progress-dot {
+      width: 32px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .progress-dot.active {
+      background: var(--accent);
+    }
+
+    .progress-dot.done {
+      background: var(--accent2);
+    }
+
+    .question {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 28px;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .options.two-col { grid-template-columns: 1fr 1fr; }
+
+    .option-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: var(--accent);
+      background: rgba(0,229,255,0.06);
+      transform: translateY(-2px);
+      color: #fff;
+    }
+
+    /* ===== ЗАГРУЗКА ===== */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 100px 0;
+    }
+
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading p { color: var(--muted); font-size: 16px; }
+    .loading p span { color: var(--accent); }
+
+    /* ===== РЕЗУЛЬТАТЫ ===== */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .results-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .reset-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 18px;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 20px;
+    }
+
+    /* ===== КАРТОЧКА ===== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,229,255,0.4);
+      box-shadow: 0 8px 30px rgba(0,229,255,0.08);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card img {
+      width: 100%;
+      height: 145px;
+      object-fit: cover;
+      display: block;
+      background: var(--border);
+    }
+
+    .card-body { padding: 16px; }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .price { color: var(--accent2); font-weight: 600; }
+
+    .rating-good { color: #4ade80; }
+    .rating-mid  { color: #facc15; }
+    .rating-bad  { color: #f87171; }
+
+    .card-owners {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .steam-btn {
+      display: block;
+      background: linear-gradient(135deg, #1565c0, #1976d2);
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s;
+    }
+
+    .steam-btn:hover { opacity: 0.85; }
+
+    /* ===== ПУСТО ===== */
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 60px 0;
+      font-size: 16px;
+    }
+
+    /* ===== ОШИБКА ===== */
+    .error-msg {
+      text-align: center;
+      color: #f87171;
+      padding: 40px;
+      background: var(--surface);
+      border: 1px solid #7f1d1d;
+      border-radius: 16px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .error-msg button {
+      margin-top: 16px;
+      background: transparent;
+      border: 1px solid #f87171;
+      color: #f87171;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">🕹️</span>
+    <span class="logo-text">HiddenSteam</span>
+  </div>
+  <p class="tagline">Скрытые жемчужины Steam — которые никто не видел</p>
+</header>
+
+<main id="app"></main>
+
+<script>
+  // ============================================================
+  //  ДАННЫЕ КВИЗА
+  // ============================================================
+  const QUESTIONS = [
+    {
+      key: "mode",
+      title: "Как хочешь играть?",
+      options: [
+        { id: "single",    label: "🧍 Один" },
+        { id: "coop",      label: "👥 С друзьями" },
+        { id: "any",       label: "🎲 Всё равно" },
+      ],
+    },
+    {
+      key: "price",
+      title: "Сколько готов потратить?",
+      options: [
+        { id: "free",  label: "🆓 Бесплатно",    max: 0   },
+        { id: "cheap", label: "💸 До $1",          max: 100  },
+        { id: "mid",   label: "💰 До $10",         max: 1000 },
+        { id: "any",   label: "🤑 Любая цена",     max: 99999},
+      ],
+    },
+    {
+      key: "genre",
+      title: "Любимый жанр?",
+      twoCol: true,
+      options: [
+        { id: "Action",      label: "⚔️ Экшн" },
+        { id: "Puzzle",      label: "🧩 Головоломка" },
+        { id: "RPG",         label: "🐉 RPG" },
+        { id: "Strategy",    label: "♟️ Стратегия" },
+        { id: "Simulation",  label: "🏗️ Симулятор" },
+        { id: "Horror",      label: "👻 Хоррор" },
+        { id: "Platformer",  label: "🎮 Платформер" },
+        { id: "Adventure",   label: "🗺️ Приключения" },
+      ],
+    },
+  ];
+
+  // ============================================================
+  //  СОСТОЯНИЕ
+  // ============================================================
+  let state = {
+    step: "quiz",   // quiz | loading | results | error
+    current: 0,
+    answers: {},
+    games: [],
+    errorMsg: "",
+  };
+
+  function setState(patch) {
+    state = { ...state, ...patch };
+    render();
+  }
+
+  // ============================================================
+  //  API
+  // ============================================================
+  async function fetchGames(genre, priceMax, mode) {
+    // Запрос к нашему прокси-серверу
+    const res = await fetch(`http://localhost:3000/api/games?tag=${encodeURIComponent(genre)}`);
+    if (!res.ok) throw new Error("Ошибка сервера");
+    const data = await res.json();
+
+    const games = Object.values(data).filter(g => {
+      const price   = g.price || 0;                                   // в центах
+      const reviews = (g.positive || 0) + (g.negative || 0);
+      const owners  = parseInt((g.owners || "0").split(" ")[0].replace(/,/g, "")) || 0;
+
+      const priceOk  = price <= priceMax;
+      const hidden   = owners < 500000 && reviews < 5000 && reviews > 20;
+      return priceOk && hidden;
+    });
+
+    // Перемешиваем и берём 9
+    return games.sort(() => Math.random() - 0.5).slice(0, 9);
+  }
+
+  async function startSearch() {
+    setState({ step: "loading" });
+    try {
+      const priceMax = QUESTIONS[1].options.find(o => o.id === state.answers.price)?.max ?? 99999;
+      const games = await fetchGames(state.answers.genre, priceMax, state.answers.mode);
+      setState({ step: "results", games });
+    } catch (e) {
+      setState({ step: "error", errorMsg: "Не удалось подключиться к серверу.\nУбедись что server.js запущен." });
+    }
+  }
+
+  // ============================================================
+  //  РЕНДЕР
+  // ============================================================
+  function render() {
+    const app = document.getElementById("app");
+
+    if (state.step === "quiz")    app.innerHTML = renderQuiz();
+    if (state.step === "loading") app.innerHTML = renderLoading();
+    if (state.step === "results") app.innerHTML = renderResults();
+    if (state.step === "error")   app.innerHTML = renderError();
+
+    attachEvents();
+  }
+
+  // ---- Квиз ----
+  function renderQuiz() {
+    const q = QUESTIONS[state.current];
+    const dots = QUESTIONS.map((_, i) => {
+      const cls = i < state.current ? "done" : i === state.current ? "active" : "";
+      return `<div class="progress-dot ${cls}"></div>`;
+    }).join("");
+
+    const btns = q.options.map(opt =>
+      `<button class="option-btn" data-value="${opt.id}">${opt.label}</button>`
+    ).join("");
+
+    return `
+      <div class="quiz-card">
+        <div class="progress">${dots}</div>
+        <h2 class="question">${q.title}</h2>
+        <div class="options ${q.twoCol ? "two-col" : ""}">${btns}</div>
+      </div>`;
+  }
+
+  // ---- Загрузка ----
+  function renderLoading() {
+    return `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Ищем <span>скрытые жемчужины</span>...</p>
+        <p>Копаемся в глубинах Steam 🔍</p>
+      </div>`;
+  }
+
+  // ---- Результаты ----
+  function renderResults() {
+    if (state.games.length === 0) {
+      return `
+        <div class="results-header">
+          <h2 class="results-title">😔 Ничего не нашли</h2>
+          <button class="reset-btn" id="resetBtn">🔄 Попробовать снова</button>
+        </div>
+        <div class="empty">Попробуй другие фильтры — Steam огромный!</div>`;
+    }
+
+    const cards = state.games.map((g, i) => renderCard(g, i)).join("");
+    return `
+      <div class="results-header">
+        <h2 class="results-title">🎯 Найдено ${state.games.length} скрытых игр</h2>
+        <button class="reset-btn" id="resetBtn">🔄 Заново</button>
+      </div>
+      <div class="games-grid">${cards}</div>`;
+  }
+
+  function renderCard(game, index) {
+    const appid   = game.appid;
+    const img     = `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`;
+    const url     = `https://store.steampowered.com/app/${appid}`;
+    const price   = game.price === 0 ? "🆓 Бесплатно" : game.price
+                    ? `$${(game.price / 100).toFixed(2)}` : "Цена неизвестна";
+
+    const total   = (game.positive || 0) + (game.negative || 0);
+    const pct     = total ? Math.round(game.positive / total * 100) : null;
+    const ratingCls = pct >= 70 ? "rating-good" : pct >= 40 ? "rating-mid" : "rating-bad";
+    const rating  = pct !== null ? `<span class="${ratingCls}">👍 ${pct}%</span>` : "";
+
+    return `
+      <div class="card" style="animation-delay:${index * 0.05}s">
+        <img src="${img}" alt="${escHtml(game.name)}"
+             onerror="this.style.display='none'">
+        <div class="card-body">
+          <div class="card-title" title="${escHtml(game.name)}">${escHtml(game.name)}</div>
+          <div class="card-meta">
+            <span class="price">${price}</span>
+            ${rating}
+          </div>
+          <div class="card-owners">👥 ${game.owners || "Мало игроков"}</div>
+          <a class="steam-btn" href="${url}" target="_blank" rel="noreferrer">
+            Открыть в Steam →
+          </a>
+        </div>
+      </div>`;
+  }
+
+  // ---- Ошибка ----
+  function renderError() {
+    return `
+      <div class="error-msg">
+        <p>⚠️ ${state.errorMsg.replace(/\n/g, "<br>")}</p>
+        <button id="resetBtn">← Вернуться</button>
+      </div>`;
+  }
+
+  // ============================================================
+  //  СОБЫТИЯ
+  // ============================================================
+  function attachEvents() {
+    // Кнопки квиза
+    document.querySelectorAll(".option-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const value = btn.dataset.value;
+        const key   = QUESTIONS[state.current].key;
+        const newAnswers = { ...state.answers, [key]: value };
+
+        if (state.current < QUESTIONS.length - 1) {
+          setState({ answers: newAnswers, current: state.current + 1 });
+        } else {
+          state.answers = newAnswers;
+          startSearch();
+        }
+      });
+    });
+
+    // Кнопка сброса
+    const resetBtn = document.getElementById("resetBtn");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        setState({ step: "quiz", current: 0, answers: {}, games: [] });
+      });
+    }
+  }
+
+  // ============================================================
+  //  УТИЛИТЫ
+  // ============================================================
+  function escHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // Старт
+  render();
+</script>
+</body>
+</html>
